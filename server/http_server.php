@@ -40,12 +40,15 @@ $http_server->on('request',function($request ,$response){
      		$_POST[$k] = $v;
      	}
      }
-
+     
+     ob_start();
      // 2. 执行应用
      think\App::run()->send();
-
+     
+     $res = ob_get_contents();
+     ob_end_clean();
     //服务器返回信息
-    $response->end();
+    $response->end($res);
 });
  
 $http_server->start();
