@@ -5,6 +5,6 @@ class Index
 {
     public function index()
     {
-        return "success";
+        var_dump($_GET);
     }
 }

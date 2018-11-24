@@ -16,7 +16,7 @@ $http_server->set(
 	define('APP_PATH', __DIR__ . '/../application/');
 	require __DIR__ . '/../thinkphp/base.php';
  });
-$http_server->on('request',function($request ,$response){  
+$http_server->on('request',function($request ,$response) use($http_server){  
      if(isset($request->server)){
      	foreach($request->server as $k=>$v){
      		$_SERVER[strtoupper($k)] = $v;
@@ -43,12 +43,18 @@ $http_server->on('request',function($request ,$response){
      
      ob_start();
      // 2. 执行应用
-     think\App::run()->send();
+     try{
+        think\App::run()->send();
+     }catch(\Exception $e){
+     	echo $e->getMessage();
+     }
      
      $res = ob_get_contents();
      ob_end_clean();
     //服务器返回信息
     $response->end($res);
+
+    $http_server->close();
 });
  
 $http_server->start();
