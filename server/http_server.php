@@ -40,6 +40,10 @@ $http_server->on('request',function($request ,$response){
      		$_POST[$k] = $v;
      	}
      }
+
+     // 2. 执行应用
+     think\App::run()->send();
+
     //服务器返回信息
     $response->end();
 });
