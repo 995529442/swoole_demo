@@ -435,7 +435,9 @@ class Request
     {
         //if (is_null($this->path)) {
             $suffix   = Config::get('url_html_suffix');
+            var_dump($suffix);
             $pathinfo = $this->pathinfo();
+            var_dump($pathinfo);
             if (false === $suffix) {
                 // 禁止伪静态访问
                 $this->path = $pathinfo;
