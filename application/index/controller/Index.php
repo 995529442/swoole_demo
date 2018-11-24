@@ -7,4 +7,9 @@ class Index
     {
         var_dump($_GET);
     }
+
+   public function test()
+    {
+        echo "tests";
+    }
 }
