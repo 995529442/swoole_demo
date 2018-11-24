@@ -16,11 +16,32 @@ $http_server->set(
 	define('APP_PATH', __DIR__ . '/../application/');
 	require __DIR__ . '/../thinkphp/base.php';
  });
-$http_server->on('request',function($request ,$response){
-    //设置响应头信息
-    //$response->cookie('xyj','hello',86400);
+$http_server->on('request',function($request ,$response){  
+     if(isset($request->server)){
+     	foreach($request->server as $k=>$v){
+     		$_SERVER[strtoupper($k)] = $v;
+     	}
+     }
+
+    if(isset($request->header)){
+     	foreach($request->header as $k=>$v){
+     		$_SERVER[strtoupper($k)] = $v;
+     	}
+     }
+
+    if(isset($request->get)){
+     	foreach($request->get as $k=>$v){
+     		$_GET[$k] = $v;
+     	}
+     }
+
+    if(isset($request->post)){
+     	foreach($request->post as $k=>$v){
+     		$_POST[$k] = $v;
+     	}
+     }
     //服务器返回信息
-    $response->end('http_server' . json_encode($request->get));
+    $response->end();
 });
  
 $http_server->start();
