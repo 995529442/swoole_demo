@@ -33,6 +33,6 @@ class Index
         	$return['errcode'] = 1;
         	$return['errmsg'] = "success";
         }
-        echo json_encode($return);
+        return json_encode($return);
     }
 }
