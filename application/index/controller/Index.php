@@ -10,7 +10,7 @@ class Index
 
    public function test()
     {
-        echo "tests"
+        echo "tests";
     }
 
    public function login()
@@ -21,9 +21,9 @@ class Index
     	);
         $code = mt_rand(1000,9999);
 
-        $redis = swoole_redis;
+        $redis = new swoole_redis;
 
-        $redis = redis->connect('127.0.0.1',6379,function(swoole_redis $redis,$result){
+        $redis = $redis->connect('127.0.0.1',6379,function(swoole_redis $redis,$result){
              $redis->set("phone",$code,function(swoole_redis $redis,$result){
                  $return['errcode'] = 1;
                  $return['errmsg'] = "success";
