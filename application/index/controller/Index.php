@@ -15,15 +15,23 @@ class Index
 
    public function login()
     {
-		$redis = new swoole_redis;
-		$redis->connect("127.0.0.1",6379,function(swoole_redis $redis,$result){
-			echo "success".PHP_EOL;
-			
-			$redis->set("name","sam",function(swoole_redis $redis,$result){
-				 var_dump($result);
-			});
-			
-			$redis->close();
-		});
+    	$return = array(
+           "errcode" => -1,
+           "errmsg" => "fail"
+    	);
+    	$phone = $_GET['phone'];
+        $code = mt_rand(1000,9999);
+
+        //协程redis
+        $redis = new \Swoole\Coroutine\Redis();
+
+        $redis = $redis->connect('127.0.0.1',6379);
+        $res = $redis->set("sms_".$phone,$code,120);
+        
+        if($res){
+        	$return['errcode'] = 1;
+        	$return['errmsg'] = "success";
+        }
+        echo $return;
     }
 }
