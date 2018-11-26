@@ -97,17 +97,20 @@
 			    var phone_num = $(" input[ name='phone_num' ] ").val()
 				url = "http://samproject.cn:9501/?s=index/index/login&phone_num="+phone_num;
 				$(this).html('已发送').attr('disabled', true);
-				// $.post()
-				$.get(url, function (data) {
-					console.log(data);
-					// TODO: 将下面3行代码删除
-					if (data.errcode > 0) {
-						alert('发送完成');
-					}
-					// if (result.status != 'ok') {
-					// 	alert('网络错误');
-					// }
-				});
+
+				$.ajax({
+		             type: "GET",
+		             url: url,
+		             data: {phone_num:phone_num},
+		             dataType: "json",
+		             success: function(data){
+						console.log(data);
+						// TODO: 将下面3行代码删除
+						if (data.errcode > 0) {
+							alert('发送完成');
+						}
+                      }
+		         });
 			});
 
 			// 提交表单
