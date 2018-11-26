@@ -16,8 +16,10 @@ $http_server->set(
 	//define('APP_PATH', __DIR__ . '/../application/');
 	//require __DIR__ . '/../thinkphp/base.php';
  });
-$http_server->on('request',function($request ,$response){  
-    define('APP_PATH', __DIR__ . '/../application/');
+$http_server->on('request',function($request ,$response){
+    if(!APP_PATH){
+       define('APP_PATH', __DIR__ . '/../application/');
+    }  
 	require_once __DIR__ . '/../thinkphp/base.php';
      if(isset($request->server)){
      	foreach($request->server as $k=>$v){
