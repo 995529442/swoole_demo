@@ -4,7 +4,10 @@ namespace app\index\controller;
 class Index
 {
 	public function __construct(){
-		$this->redis = new \Swoole\Coroutine\Redis()->connect('127.0.0.1',6379);
+		$this->redis = new \Swoole\Coroutine\Redis();
+
+		$this->redis->connect('127.0.0.1',6379);
+
 	}
     public function index()
     {
@@ -26,7 +29,11 @@ class Index
         $code = mt_rand(1000,9999);
 
         //协程redis
-        $res = $this->redis->set("sms_".$phone,$code,120);
+        $redis = new \Swoole\Coroutine\Redis();
+
+        $redis->connect('127.0.0.1',6379);
+		
+        $res = $redis->set("sms_".$phone,$code,120);
         
         if($res){
         	$return['errcode'] = 1;
