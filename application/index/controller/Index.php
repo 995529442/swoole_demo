@@ -25,7 +25,8 @@ class Index
         //协程redis
         $redis = new \Swoole\Coroutine\Redis();
 
-        $redis = $redis->connect('127.0.0.1',6379);
+        $redis->connect('127.0.0.1',6379);
+		
         $res = $redis->set("sms_".$phone,$code,120);
         
         if($res){
