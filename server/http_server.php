@@ -13,10 +13,12 @@ $http_server->set(
  
  $http_server->on('WorkerStart',function($http_server,$worker_id){
 	// 定义应用目录
-	define('APP_PATH', __DIR__ . '/../application/');
-	require __DIR__ . '/../thinkphp/base.php';
+	//define('APP_PATH', __DIR__ . '/../application/');
+	//require __DIR__ . '/../thinkphp/base.php';
  });
 $http_server->on('request',function($request ,$response){  
+    define('APP_PATH', __DIR__ . '/../application/');
+	require_once __DIR__ . '/../thinkphp/base.php';
      if(isset($request->server)){
      	foreach($request->server as $k=>$v){
      		$_SERVER[strtoupper($k)] = $v;
