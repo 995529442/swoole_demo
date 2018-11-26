@@ -8,6 +8,11 @@ class Index
         var_dump($_GET);
     }
 
+   public function test()
+    {
+        echo "tests"
+    }
+
    public function login()
     {
     	$return = array(
