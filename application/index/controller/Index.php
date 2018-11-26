@@ -19,7 +19,7 @@ class Index
            "errcode" => -1,
            "errmsg" => "fail"
     	);
-    	$phone = $_GET['phone'];
+    	$phone = $_GET['phone_num'];
         $code = mt_rand(1000,9999);
 
         //协程redis
