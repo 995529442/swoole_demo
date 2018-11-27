@@ -107,7 +107,7 @@
 					// if (result.status != 'ok') {
 					// 	alert('网络错误');
 					// }
-				});
+				},'json');
 			});
 
 			// 提交表单
@@ -120,10 +120,12 @@
 				$.get(url, function (data) {
 					console.log(data);
 					// TODO: 将下面3行代码删除
-					// if (result.status != 'ok') {
-					// 	alert('网络错误');
-					// }
-				});
+					if (data.errcode < 0) {
+						alert(data.errmsg);
+					}else{
+					  window.location.href="./index.html";
+					}
+				},'json');
 			});
 
 			// 返回上一页

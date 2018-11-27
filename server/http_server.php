@@ -8,6 +8,7 @@ $http_server->set(
         'enable_static_handler' => true,
         'document_root' => '/data/wwwroot/swoole_demo/public/static',
         'worker_num'=> 4,
+		'task_worker_num' => 2,
     ]
 );
  
@@ -16,7 +17,7 @@ $http_server->set(
 	define('APP_PATH', __DIR__ . '/../application/');
 	require __DIR__ . '/../thinkphp/base.php';
  });
-$http_server->on('request',function($request ,$response){
+$http_server->on('request',function($request ,$response) use($http_server){
      if(isset($request->server)){
      	foreach($request->server as $k=>$v){
      		$_SERVER[strtoupper($k)] = $v;
@@ -42,7 +43,7 @@ $http_server->on('request',function($request ,$response){
      		$_POST[$k] = $v;
      	}
      }
-     
+     $_POST['task'] = $http_server;
      ob_start();
      // 2. 执行应用
      try{
@@ -57,4 +58,14 @@ $http_server->on('request',function($request ,$response){
     $response->end($res);
 });
  
+  $http_server->on('task',function($task_id,$src_worker_id,$data){
+	// 定义应用目录
+	print_r($data);
+ });
+ 
+   $http_server->on('finish',function($task_id,$data){
+      echo "finish".PHP_EOL;
+ });
+
+
 $http_server->start();
