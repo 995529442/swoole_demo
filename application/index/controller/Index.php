@@ -50,6 +50,8 @@ class Index
     	$phone = $_GET['phone_num'];
         $code = mt_rand(1000,9999);
 
+		//$_POST['task']->task($return);
+		//exit;
         //协程redis
         $redis = new \Swoole\Coroutine\Redis();
 

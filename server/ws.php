@@ -1,48 +1,145 @@
 <?php
-class Ws
-{
-	CONST HOST = "0.0.0.0";
-	CONST PORT = 9502;
+class Ws {
 
-	public $ws = null;
-	public function __contruct(){
-		$this->ws = new swoole_websocket_server(HOST,PORT);
+    CONST HOST = "0.0.0.0";
+    CONST PORT = 9502;
 
-		$this->ws->set([
-              'worker_num' => 4,
-              'task_worker_num' => 2,
-		]);
+    public $ws = null;
+    public function __construct() {
+        $this->ws = new swoole_websocket_server("0.0.0.0", 9502);
 
-		$this->ws->on("open",[$this,'onOpen']);
-		$this->ws->on("message",[$this,'onMessage']);
-		$this->ws->on("task",[$this,'onTask']);
-		$this->ws->on("finish",[$this,'onFinish']);
-		$this->ws->on("close",[$this,'onClose']);
+        $this->ws->set(
+            [
+			    'enable_static_handler' => true,
+                'document_root' => '/data/wwwroot/swoole_demo/public/static',
+                'worker_num' => 2,
+                'task_worker_num' => 2,
+            ]
+        );
+        $this->ws->on("open", [$this, 'onOpen']);
+        $this->ws->on("message", [$this, 'onMessage']);
+        $this->ws->on("task", [$this, 'onTask']);
+        $this->ws->on("finish", [$this, 'onFinish']);
+        $this->ws->on("close", [$this, 'onClose']);
+        $this->ws->on("WorkerStart", [$this, 'onWorkerStart']);
+		$this->ws->on("request", [$this, 'onRequest']);
+        $this->ws->start();
+    }
 
-		$this->ws->start();
-	}
+	 public function onWorkerStart($serv, $workerId) {
+	 	// 定义应用目录
+		define('APP_PATH', __DIR__ . '/../application/');
+		require __DIR__ . '/../thinkphp/base.php';
+	 }
+	 
+	public function onRequest($request, $response) {
+		 if(isset($request->server)){
+			foreach($request->server as $k=>$v){
+				$_SERVER[strtoupper($k)] = $v;
+			}
+		 }
 
-	public function onOpen($ws,$request){
-		echo 'fd:'.$request->fd.PHP_EOL;
-	}
+		if(isset($request->header)){
+			foreach($request->header as $k=>$v){
+				$_SERVER[strtoupper($k)] = $v;
+			}
+		 }
 
-	public function onMessage($ws,$frame){
-		$ws->push($frame->fd,"返回的消息：".date("Y-m-d H:i:s",time()).PHP_EOL);
-	}
+		$_GET = [];
+		if(isset($request->get)){
+			foreach($request->get as $k=>$v){
+				$_GET[$k] = $v;
+			}
+		 }
 
-	public function onTask($serv, $taskId, $workerId, $data){
-		print_r($data);
-		return "task finish:".$workerId.PHP_EOL;
-	}
+		$_POST = [];
+		if(isset($request->post)){
+			foreach($request->post as $k=>$v){
+				$_POST[$k] = $v;
+			}
+		 }
+         
+		 $_POST['task'] = $this->ws;
+		 ob_start();
+		 // 2. 执行应用
+		 try{
+			think\App::run()->send();
+		 }catch(\Exception $e){
+			echo $e->getMessage();
+		 }
+		 
+		 $res = ob_get_contents();
+		 ob_end_clean();
+		//服务器返回信息
+		$response->end($res);
+	 }
+	 
+    /**
+     * 监听ws连接事件
+     * @param $ws
+     * @param $request
+     */
+    public function onOpen($ws, $request) {
+        var_dump($request->fd);
+        if($request->fd == 1) {
+            // 每2秒执行
+            swoole_timer_tick(2000, function($timer_id){
+                echo "2s: timerId:{$timer_id}\n";
+            });
+        }
+    }
 
-	public function onFinish($serv,$taskId,$data){
-		echo "taskId:{$taskId}\n";
+    /**
+     * 监听ws消息事件
+     * @param $ws
+     * @param $frame
+     */
+    public function onMessage($ws, $frame) {
+        echo "ser-push-message:{$frame->data}\n";
+        // todo 10s
+        $data = [
+            'task' => 1,
+            'fd' => $frame->fd,
+        ];
+        //$ws->task($data);
+
+        swoole_timer_after(5000, function() use($ws, $frame) {
+            echo "5s-after\n";
+            $ws->push($frame->fd, "server-time-after:");
+        });
+        $ws->push($frame->fd, "server-push:".date("Y-m-d H:i:s"));
+    }
+
+    /**
+     * @param $serv
+     * @param $taskId
+     * @param $workerId
+     * @param $data
+     */
+    public function onTask($serv, $taskId, $workerId, $data) {
+        print_r($data);
+        // 耗时场景 10s      
+        return "on task finish"; // 告诉worker
+    }
+
+    /**
+     * @param $serv
+     * @param $taskId
+     * @param $data
+     */
+    public function onFinish($serv, $taskId, $data) {
+        echo "taskId:{$taskId}\n";
         echo "finish-data-sucess:{$data}\n";
-	}
+    }
 
-	public function onClose($ws,$fd){
-		echo "clientid:{$fd}\n";
-	}
+    /**
+     * close
+     * @param $ws
+     * @param $fd
+     */
+    public function onClose($ws, $fd) {
+        echo "clientid:{$fd}\n";
+    }
 }
 
 $obj = new Ws();
