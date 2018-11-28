@@ -11,7 +11,21 @@ class Index
 	}
     public function index()
     {
-        var_dump($_GET);
+		$server = $_POST['task'];
+
+		$redis = new \Redis();
+		$redis->connect("127.0.0.1",6379);
+
+		$fd = $redis->smembers('fd');
+	
+		$server->task($fd);
+		/*if($fd){
+		   for($k=0;$k<count($fd);$k++){
+			  $server->push($fd[$k],"发送消息：".date("Y-m-d H:i:s",time())); 
+		   }
+		}*/
+		
+		//$server->push($fd,"ddd");
     }
 
    public function checkLogin()

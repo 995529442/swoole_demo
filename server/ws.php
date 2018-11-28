@@ -5,9 +5,13 @@ class Ws {
     CONST PORT = 9502;
 
     public $ws = null;
+	public $redis = null;
     public function __construct() {
         $this->ws = new swoole_websocket_server("0.0.0.0", 9502);
 
+		$this->redis = new \Redis();
+		$this->redis->connect("127.0.0.1",6379);
+		
         $this->ws->set(
             [
 			    'enable_static_handler' => true,
@@ -80,13 +84,8 @@ class Ws {
      * @param $request
      */
     public function onOpen($ws, $request) {
+		$this->redis->sadd("fd",$request->fd);
         var_dump($request->fd);
-        if($request->fd == 1) {
-            // 每2秒执行
-            swoole_timer_tick(2000, function($timer_id){
-                echo "2s: timerId:{$timer_id}\n";
-            });
-        }
     }
 
     /**
@@ -103,11 +102,11 @@ class Ws {
         ];
         //$ws->task($data);
 
-        swoole_timer_after(5000, function() use($ws, $frame) {
+        /*swoole_timer_after(5000, function() use($ws, $frame) {
             echo "5s-after\n";
             $ws->push($frame->fd, "server-time-after:");
         });
-        $ws->push($frame->fd, "server-push:".date("Y-m-d H:i:s"));
+        $ws->push($frame->fd, "server-push:".date("Y-m-d H:i:s"));*/
     }
 
     /**
@@ -117,8 +116,12 @@ class Ws {
      * @param $data
      */
     public function onTask($serv, $taskId, $workerId, $data) {
-        print_r($data);
-        // 耗时场景 10s      
+		if($data){
+		   for($k=0;$k<count($data);$k++){
+			  $this->ws->push($data[$k],"发送消息：".date("Y-m-d H:i:s",time())); 
+		   }
+		}
+    
         return "on task finish"; // 告诉worker
     }
 
@@ -138,6 +141,7 @@ class Ws {
      * @param $fd
      */
     public function onClose($ws, $fd) {
+		$this->redis->srem("fd",$fd);
         echo "clientid:{$fd}\n";
     }
 }
